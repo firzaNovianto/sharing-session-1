@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import getSinglePokemon from '@/api/getSinglePokemon';
 import React from 'react'
@@ -6,26 +7,34 @@ import { useParams } from 'next/navigation';
 import * as yup from "yup"
 import {Form,Formik,Field,ErrorMessage} from "formik"
 
+//buat di folder khusus schema
 const levelUpSchema = yup.object().shape({
     level:yup.number().required("Please input lv")
 })
 
+//buat di folder khusus initial value
 const initialValueLevel = {
     level:0
+}
+
+type RecordLevelUp = {
+    level : string,
+    timeStamp : string
 }
 
 
 const Pokedex = () => {
     const params = useParams();
-    const slug:string | undefined = params.slug;
+    const slug:any = params.slug;
     const [dataPokemon,setDataPokemon] = useState<any>({})
     const [calculatePokemon,setCalculatePokemon] = useState<any>({})
+    const [levelUpRecord,setLevelUpRecord] = useState<any>([])
     const [lv,setLv] = useState<number>(1)
 
 
     useEffect(() => {
         const fetchData = async () =>{
-            const data = await getSinglePokemon(slug)
+            const data:any = await getSinglePokemon(slug)
             setDataPokemon(data.data)
             setCalculatePokemon(data.data)
         }
@@ -34,15 +43,34 @@ const Pokedex = () => {
 
 
     const calculatorLv = (paramsLv:number) => {
+        //Validasi data yang masuk
+        if(paramsLv <= 0){
+            return alert("level tidak boleh 0 atau kurang")    
+        }
+        alert("level up success!!!")
+
+        
         setLv(paramsLv)
+        //Updated data pokemon
+        // validasi angka berulang dan penambahan value
         const newHeight = paramsLv === 1 ? calculatePokemon.height : calculatePokemon.height + (paramsLv * 0.25) 
         const newWeight = paramsLv === 1 ? calculatePokemon.weight : calculatePokemon.weight  + (paramsLv * 0.25)
         const changeValue = {...calculatePokemon,weight:newWeight,height:newHeight}
         setDataPokemon(changeValue)
+        // created Riwayat level up Pokemon
+        const addRecord = {
+            level:paramsLv,
+            timeStamp: new Date()
+        }
+        const updateData = [...levelUpRecord,addRecord]
+        setLevelUpRecord(updateData)
+
     }
+
     
   return (
-  <div className="flex items-center justify-center h-[65vh]">
+    <div className="grid grid-cols-8">
+          <div className="flex items-center justify-center h-[65vh] col-span-6">
       <div className="text-center text-4xl font-bold">
         Pokedex {dataPokemon?.name}
     <p>
@@ -98,6 +126,20 @@ const Pokedex = () => {
     </div>
     </div>
   </div>
+  <div className="col-span-2 p-4">
+    <div>
+    <h1 className="text-2xl font-bold">Record Lv up Progress</h1>
+    </div>
+    <div className="flex justify-start flex-col">
+    {levelUpRecord?.map((data:RecordLevelUp,index:number) => {
+        return (<div key={index}>
+            {`lv ${data?.level} => ${new Date(data.timeStamp).toLocaleString()}`}
+            {}
+        </div>)
+    })}
+    </div>
+  </div>
+    </div>
   )
 }
 
