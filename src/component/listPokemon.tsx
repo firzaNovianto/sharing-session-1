@@ -5,25 +5,22 @@ import React from 'react'
 import getPokemon from '@/api/getPokemon'
 import {useState,useEffect} from 'react'
 import Link from 'next/link'
+import { Pokemon } from '@/types/Pokemon'
 
 // type dibuat di folder types
-type data = {
-  name:string,
-  url:string
-}
 
 
 const ListPokemon = () => {
   // Nama variabel tidak jelas
-const [x,y] = useState<data[]>([])
+const [pokemon,setPokemon] = useState<Pokemon[]>([])
 const pathname = usePathname()
 
 useEffect(() => {
-  const getData = async () => {
+  const getDataPokemon = async () => {
     const data:any = await getPokemon()
-    y(data?.data.results)
+    setPokemon(data?.data.results)
   }
-  getData()
+  getDataPokemon()
   }
 
  ,[]
@@ -33,7 +30,7 @@ useEffect(() => {
 
   return (
     <div className={`grid grid-cols-3 gap-4 bg-gray-800  p-4 h-[35vh] `}>
-    {x.map((item:any,index:number) => (
+    {pokemon.map((item:any,index:number) => (
             <Link href={`/pokemon/${index+1}`}
              key={index}
              className={`${pathname.startsWith(`/pokemon/${index+1}`)?"text-blue-600":"text-white"}`}

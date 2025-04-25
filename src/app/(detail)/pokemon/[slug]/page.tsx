@@ -4,18 +4,14 @@ import getSinglePokemon from '@/api/getSinglePokemon';
 import React from 'react'
 import { useEffect,useState } from 'react';
 import { useParams } from 'next/navigation';
-import * as yup from "yup"
+// import * as yup from "yup"
 import {Form,Formik,Field,ErrorMessage} from "formik"
+import { levelUpSchema } from '@/formiks/schema/levelUpSchema';
+import { initialValueLevel } from '@/types/recordsLevelUp';
 
 //buat di folder khusus schema
-const levelUpSchema = yup.object().shape({
-    level:yup.number().required("Please input lv")
-})
 
 //buat di folder khusus initial value
-const initialValueLevel = {
-    level:0
-}
 
 type RecordLevelUp = {
     level : string,
@@ -41,29 +37,41 @@ const Pokedex = () => {
         fetchData()
     },[slug])
 
-
-    const calculatorLv = (paramsLv:number) => {
-        //Validasi data yang masuk
+    const validasiLevelUp = (paramsLv:number) => {
         if(paramsLv <= 0){
             return alert("level tidak boleh 0 atau kurang")    
         }
         alert("level up success!!!")
+    }
 
-        
-        setLv(paramsLv)
-        //Updated data pokemon
-        // validasi angka berulang dan penambahan value
-        const newHeight = paramsLv === 1 ? calculatePokemon.height : calculatePokemon.height + (paramsLv * 0.25) 
-        const newWeight = paramsLv === 1 ? calculatePokemon.weight : calculatePokemon.weight  + (paramsLv * 0.25)
+    const updatedPokemon = (paramsLv:number) => {
+        const isFirstLevel =  paramsLv === 1
+        const addValue = paramsLv * 0.25
+        const newHeight = isFirstLevel ? calculatePokemon.height : calculatePokemon.height + addValue 
+        const newWeight = isFirstLevel ? calculatePokemon.weight : calculatePokemon.weight  + addValue
         const changeValue = {...calculatePokemon,weight:newWeight,height:newHeight}
         setDataPokemon(changeValue)
-        // created Riwayat level up Pokemon
+    }
+
+    const createdHistoryLvUp = (paramsLv:number) => {
         const addRecord = {
             level:paramsLv,
             timeStamp: new Date()
         }
         const updateData = [...levelUpRecord,addRecord]
         setLevelUpRecord(updateData)
+    }
+
+    const calculatorLv = (paramsLv:number) => {
+        //Validasi data yang masuk
+       validasiLevelUp(paramsLv)
+        setLv(paramsLv)
+        //Updated data pokemon
+        // validasi angka berulang dan penambahan value
+        updatedPokemon(paramsLv)
+        // created Riwayat level up Pokemon
+        createdHistoryLvUp(paramsLv)
+   
 
     }
 
